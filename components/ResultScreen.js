@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { getFavorites, saveFavorite, updateRating } from './LocalStorage';
-import StarRating from './StarRating'; // Importez votre composant personnalisé
+import StarRating from './StarRating';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient'; // Pour le dégradé
 
 const ResultScreen = ({ route }) => {
     const { item } = route.params;
@@ -10,19 +12,14 @@ const ResultScreen = ({ route }) => {
     // Charger le rating existant si l'élément est déjà dans les favoris
     useEffect(() => {
         const loadRating = async () => {
-            console.log('Loading rating for trackId:', item.trackId); // Vérifier le trackId
             const favorites = await getFavorites();
-            console.log('Favorites loaded:', favorites); // Vérifier les favoris chargés
             const favoriteItem = favorites.find((fav) => fav.trackId === item.trackId);
             if (favoriteItem) {
-                console.log('Rating found:', favoriteItem.rating); // Vérifier le rating trouvé
                 setRating(favoriteItem.rating);
-            } else {
-                console.log('No rating found for this track.'); // Aucun rating trouvé
             }
         };
         loadRating();
-    }, [item.trackId]); // Déclencher à chaque changement de trackId
+    }, [item.trackId]);
 
     // Ajouter aux favoris
     const handleAddToFavorites = async () => {
@@ -32,18 +29,18 @@ const ResultScreen = ({ route }) => {
 
     // Mettre à jour le rating
     const handleRatingChange = async (newRating) => {
-        console.log('1. Setting rating:', newRating);
         setRating(newRating);
-        console.log('2. Updating rating in storage...');
-        await updateRating(item.trackId, newRating, item); // Passer `item` en paramètre
-        console.log('3. Rating saved:', newRating);
+        await updateRating(item.trackId, newRating, item);
     };
 
     return (
-        <View style={styles.container}>
-            {/* Image en haut de l'écran */}
+        <LinearGradient
+            colors={['#1A1A2E', '#16213E', '#0F3460', '#E94560']} // Dégradé moderne
+            style={styles.container}
+        >
+            {/* Image de l'album */}
             <Image
-                source={{ uri: item.artworkUrl100 }} // URL de l'image de l'album/single
+                source={{ uri: item.artworkUrl100 }} // Utilisation de artworkUrl100
                 style={styles.artwork}
             />
 
@@ -54,51 +51,93 @@ const ResultScreen = ({ route }) => {
             <Text style={styles.artistName}>{item.artistName}</Text>
 
             {/* Bouton pour ajouter aux favoris */}
-            <Button title="Ajouter aux favoris" onPress={handleAddToFavorites} />
+            <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
+                <Icon name="favorite" size={24} color="#FFF" />
+                <Text style={styles.favoriteButtonText}>Ajouter aux favoris</Text>
+            </TouchableOpacity>
 
             {/* Composant StarRating pour la note */}
             <View style={styles.ratingContainer}>
-                <Text style={styles.ratingText}>Votre rating :</Text>
+                <Text style={styles.ratingText}>Votre note :</Text>
                 <StarRating
                     rating={rating}
                     onRatingChange={(newRating) => handleRatingChange(newRating)}
                 />
             </View>
-        </View>
+
+            {/* Informations supplémentaires (optionnel) */}
+            <View style={styles.infoContainer}>
+                <Text style={styles.infoText}>Album : {item.collectionName}</Text>
+                <Text style={styles.infoText}>Genre : {item.primaryGenreName}</Text>
+                <Text style={styles.infoText}>Date de sortie : {item.releaseDate.substring(0, 10)}</Text>
+            </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center', // Centrer le contenu horizontalement
-        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
     },
     artwork: {
-        width: 200, // Taille de l'image
-        height: 200,
-        borderRadius: 8, // Coins arrondis
-        marginBottom: 16, // Espace sous l'image
+        width: 150, // Taille réduite pour artworkUrl100
+        height: 150,
+        borderRadius: 10, // Coins arrondis
+        marginBottom: 20,
     },
     trackName: {
         fontSize: 24,
         fontWeight: 'bold',
-        textAlign: 'center', // Centrer le texte
-        marginBottom: 8, // Espace sous le nom de la chanson
+        color: '#FFF', // Texte blanc pour contraste
+        textAlign: 'center',
+        marginBottom: 10,
     },
     artistName: {
         fontSize: 18,
-        color: 'gray',
-        textAlign: 'center', // Centrer le texte
-        marginBottom: 16, // Espace sous le nom de l'artiste
+        color: '#DDD', // Texte gris clair pour un look sobre
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    favoriteButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Bouton semi-transparent
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 25,
+        marginBottom: 20,
+    },
+    favoriteButtonText: {
+        fontSize: 16,
+        color: '#FFF', // Texte blanc pour contraste
+        marginLeft: 10,
     },
     ratingContainer: {
-        marginTop: 16,
-        alignItems: 'center', // Centrer le contenu horizontalement
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Fond semi-transparent
+        borderRadius: 10,
+        padding: 15,
+        width: '80%',
+        alignItems: 'center',
+        marginBottom: 20,
     },
     ratingText: {
+        fontSize: 18,
+        color: '#FFF', // Texte blanc
+        marginBottom: 10,
+    },
+    infoContainer: {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Fond semi-transparent
+        borderRadius: 10,
+        padding: 15,
+        width: '80%',
+    },
+    infoText: {
         fontSize: 16,
-        marginBottom: 8,
+        color: '#FFF', // Texte blanc
+        marginBottom: 10,
     },
 });
 

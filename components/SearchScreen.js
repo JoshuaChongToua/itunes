@@ -11,29 +11,16 @@ const SearchScreen = ({ navigation }) => {
         setResults(data);
     };
 
-    React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <Button
-                    title="Favoris"
-                    onPress={() => navigation.navigate('Favorites')}
-                />
-            ),
-        });
-    }, [navigation]);
-
     // Rendu personnalisé pour chaque élément de la liste
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.itemContainer}
             onPress={() => navigation.navigate('Result', { item })}
         >
-            {/* Icône à gauche */}
             <Image
-                source={{ uri: item.artworkUrl100 }} // URL de l'image de l'album/single
+                source={{ uri: item.artworkUrl100 }}
                 style={styles.artwork}
             />
-            {/* Texte à droite */}
             <View style={styles.textContainer}>
                 <Text style={styles.trackName}>{item.trackName}</Text>
                 <Text style={styles.artistName}>{item.artistName}</Text>

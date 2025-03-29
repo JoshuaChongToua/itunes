@@ -68,7 +68,18 @@ const clearFavorites = async () => {
     }
 };
 
+const removeFavorite = async (trackId) => {
+    try {
+        const favorites = await getFavorites();
+        const updatedFavorites = favorites.filter((item) => item.trackId !== trackId); // Filtrer pour exclure l'élément à supprimer
+        await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites)); // Mettre à jour le stockage local
+        console.log('Favorite removed successfully'); // Confirmer la suppression
+    } catch (error) {
+        console.error('Error removing favorite:', error);
+    }
+};
+
 // Exporter la fonction
-export { saveFavorite, getFavorites, updateRating, clearFavorites };
+export { saveFavorite, getFavorites, updateRating, clearFavorites, removeFavorite };
 
 // Exporter les fonctions
